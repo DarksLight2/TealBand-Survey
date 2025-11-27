@@ -1,0 +1,29 @@
+{
+    "name": "tealband/survey",
+    "description": "diagnostic platform",
+    "minimum-stability": "stable",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Maksym Kovalets",
+            "email": "maksym.kovalets@gmail.com",
+            "homepage": "https://github.com/maksym.kovalets"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tealband\\Survey\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Tealband\\Survey\\Providers\\SurveyServiceProvider"
+            ]
+        }
+    }
+}
