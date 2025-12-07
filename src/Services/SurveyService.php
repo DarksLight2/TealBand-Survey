@@ -12,19 +12,56 @@ use Illuminate\Support\Facades\DB;
 use Tealband\Survey\Traits\Logger;
 use Tealband\Survey\Data\Survey\SurveyDTO;
 use Tealband\Survey\Models\EmployeeSession;
+use Tealband\Survey\Data\Survey\AnalyticDTO;
+use Tealband\Survey\Data\Survey\SurveyInfoDTO;
 use Tealband\Survey\Data\Survey\CreateSurveyDTO;
 use Tealband\Survey\Data\Survey\UpdateSurveyDTO;
+use Tealband\Survey\Contracts\SurveyServiceContract;
+use Tealband\Survey\Contracts\AnswerServiceContract;
+use Tealband\Survey\Contracts\SummaryServiceContract;
+use Tealband\Survey\Data\Question\CurrentEmployeeQuestionDTO;
+use Tealband\Survey\Contracts\ClarifyingQuestionServiceContract;
 
 /**
  * @template-extends CRUD<CreateSurveyDTO, SurveyDTO, UpdateSurveyDTO>
  */
-class SurveyService
+class SurveyService implements SurveyServiceContract
 {
     use CRUD;
     use Logger;
 
     protected string $model   = Survey::class;
     protected string $baseDTO = SurveyDTO::class;
+
+    public function hasCompletedForEmployee(int|string $employeeId, int $surveyId): bool
+    {
+        # TODO
+        return false;
+    }
+
+    public function hasActiveForEmployee(int|string $employeeId): SurveyDTO|bool
+    {
+        # TODO
+        return false;
+    }
+
+    /**
+     * Return survey session id for current employee
+     */
+    public function newEmployeeSession(
+        int $milestone,
+        int $surveyId,
+        int|string $employeeId,
+        int|string|null $departmentId,
+    ): string
+    {
+        return '';
+    }
+
+    public function getCurrentEmployeeQuestion(): CurrentEmployeeQuestionDTO|null
+    {
+
+    }
 
     public function getAllForUser(string $userId): Collection
     {
@@ -97,5 +134,40 @@ class SurveyService
             ]);
 
         return $session->id;
+    }
+
+    public function answer(): AnswerServiceContract
+    {
+        // TODO: Implement answer() method.
+    }
+
+    public function summary(): SummaryServiceContract
+    {
+        // TODO: Implement summary() method.
+    }
+
+    public function clarifyingQuestion(): ClarifyingQuestionServiceContract
+    {
+        // TODO: Implement clarifyingQuestion() method.
+    }
+
+    public function createFromTemplate()
+    {
+        // TODO: Implement createFromTemplate() method.
+    }
+
+    public function getInfo(int $surveyId): SurveyInfoDTO
+    {
+        // TODO: Implement getInfo() method.
+    }
+
+    public function analytic(int $milestone): AnalyticDTO
+    {
+        // TODO: Implement analytic() method.
+    }
+
+    public function getLimitations(int|string $userId): array
+    {
+        // TODO: Implement getLimitations() method.
     }
 }

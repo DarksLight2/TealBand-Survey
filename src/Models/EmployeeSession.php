@@ -18,6 +18,7 @@ class EmployeeSession extends Model
         'employee_id',
         'employee_type',
         'survey_id',
+        'status', // завершил или нет
     ];
 
     public function department(): MorphTo
