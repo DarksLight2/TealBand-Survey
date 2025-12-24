@@ -3,36 +3,38 @@
 namespace Tealband\Survey\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Tealband\Survey\Enums\EmployeeSessionStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployeeSession extends Model
 {
-    use HasUuids;
+    use HasUlids;
 
     protected $fillable = [
-        'milestone',
-        'department_id',
-        'department_type',
-        'employee_id',
-        'employee_type',
         'survey_id',
-        'status', // завершил или нет
+        'org_id',
+        'milestone_id',
+        'user_id',
+        'status',
+        'comment',
+        'summary',
     ];
 
-    public function department(): MorphTo
-    {
-        return $this->morphTo();
-    }
-
-    public function employee(): MorphTo
-    {
-        return $this->morphTo();
-    }
+    protected $casts = [
+        'status' => EmployeeSessionStatus::class,
+    ];
 
     public function survey(): BelongsTo
     {
         return $this->belongsTo(Survey::class);
+    }
+
+    public function surveyResponse(): HasMany
+    {
+        return $this->hasMany(SurveyResponse::class);
     }
 }

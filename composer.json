@@ -3,6 +3,7 @@
     "description": "diagnostic platform",
     "minimum-stability": "stable",
     "license": "proprietary",
+    "version": "0.1.0-beta.1",
     "authors": [
         {
             "name": "Maksym Kovalets",

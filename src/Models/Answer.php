@@ -3,21 +3,23 @@
 namespace Tealband\Survey\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Answer extends Model
 {
+    use HasUlids;
+
     protected $fillable = [
-        'text',
-        'init_followup_text',
-        'trigger_followup',
-        'gpt_prompt',
+        'prompt',
         'weight',
+        'clarifying',
         'question_id',
+        'survey_id',
+        'org_id',
     ];
 
     protected $casts = [
-        'trigger_followup' => 'boolean',
         'weight' => 'integer',
     ];
 

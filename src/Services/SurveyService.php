@@ -4,23 +4,27 @@ declare(strict_types=1);
 
 namespace Tealband\Survey\Services;
 
-use Throwable;
 use Tealband\Survey\Traits\CRUD;
 use Tealband\Survey\Models\Survey;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Tealband\Survey\Traits\Logger;
+use Tealband\Survey\Models\Answer;
+use Tealband\Survey\Models\Question;
+use Tealband\Survey\Models\Milestone;
 use Tealband\Survey\Data\Survey\SurveyDTO;
 use Tealband\Survey\Models\EmployeeSession;
 use Tealband\Survey\Data\Survey\AnalyticDTO;
 use Tealband\Survey\Data\Survey\SurveyInfoDTO;
 use Tealband\Survey\Data\Survey\CreateSurveyDTO;
 use Tealband\Survey\Data\Survey\UpdateSurveyDTO;
+use Tealband\Survey\Enums\EmployeeSessionStatus;
+use Tealband\Survey\Events\CreatedMilestoneEvent;
 use Tealband\Survey\Contracts\SurveyServiceContract;
 use Tealband\Survey\Contracts\AnswerServiceContract;
 use Tealband\Survey\Contracts\SummaryServiceContract;
+use Tealband\Survey\Events\CreatedSurveySessionEvent;
 use Tealband\Survey\Data\Question\CurrentEmployeeQuestionDTO;
 use Tealband\Survey\Contracts\ClarifyingQuestionServiceContract;
+use Tealband\Survey\Data\Question\CurrentEmployeeQuestionAnswerDTO;
 
 /**
  * @template-extends CRUD<CreateSurveyDTO, SurveyDTO, UpdateSurveyDTO>
@@ -33,122 +37,117 @@ class SurveyService implements SurveyServiceContract
     protected string $model   = Survey::class;
     protected string $baseDTO = SurveyDTO::class;
 
-    public function hasCompletedForEmployee(int|string $employeeId, int $surveyId): bool
-    {
-        # TODO
-        return false;
-    }
-
-    public function hasActiveForEmployee(int|string $employeeId): SurveyDTO|bool
-    {
-        # TODO
-        return false;
-    }
-
-    /**
-     * Return survey session id for current employee
-     */
-    public function newEmployeeSession(
-        int $milestone,
-        int $surveyId,
-        int|string $employeeId,
-        int|string|null $departmentId,
-    ): string
-    {
-        return '';
-    }
-
-    public function getCurrentEmployeeQuestion(): CurrentEmployeeQuestionDTO|null
-    {
-
-    }
-
-    public function getAllForUser(string $userId): Collection
-    {
-        return Survey::query()
-            ->where(['user_id' => $userId])
-            ->orWhereNull('user_id')
-            ->get();
-    }
-
-    public function duplicateSurvey(Survey $survey, ?string $userId = null): ?Survey
-    {
-        try {
-            return DB::transaction(function () use ($survey, $userId) {
-
-                $newSurvey = $survey->replicate(['user_id']);
-                $newSurvey->user_id = $userId;
-                $newSurvey->save();
-
-                foreach ($survey->questions as $question) {
-
-                    $newQuestion = $question->replicate(['survey_id']);
-                    $newQuestion->survey_id = $newSurvey->id;
-                    $newQuestion->save();
-
-                    foreach ($question->answers as $answer) {
-
-                        $newAnswer = $answer->replicate(['question_id']);
-                        $newAnswer->question_id = $newQuestion->id;
-                        $newAnswer->save();
-                    }
-                }
-
-                return $newSurvey;
-            });
-        } catch (Throwable $th) {
-            $this->logger()->error($th->getMessage());
-            return null;
-        }
-    }
-
-    public function createDefaultSurveysForUser(string $userId): void
-    {
-        Survey::query()
-            ->with(['questions.answers'])
-            ->whereNull('user_id')
-            ->each(function (Survey $survey) use ($userId) {
-                $newSurvey = $this->duplicateSurvey($survey, $userId);
-
-                if(is_null($newSurvey)) {
-                    $this->logger()->warning("Survey $survey->id was not duplicated");
-                }
-            });
-    }
-
-    public function startSurvey(
-        int $surveyId,
-        string $employeeId,
-        string $departmentId,
-        int $milestone = 1
-    ): string
-    {
-        $session = EmployeeSession::query()
-            ->firstOrCreate([
-                'employee_id' => $employeeId,
-                'employee_type' => config('tealband-survey.models.employee'),
-                'department_id' => $departmentId,
-                'department_type' => config('tealband-survey.models.department'),
-                'milestone' => $milestone,
-                'survey_id' => $surveyId,
-            ]);
-
-        return $session->id;
-    }
-
     public function answer(): AnswerServiceContract
     {
-        // TODO: Implement answer() method.
+        return app(AnswerServiceContract::class);
     }
 
     public function summary(): SummaryServiceContract
     {
-        // TODO: Implement summary() method.
+        return app(SummaryServiceContract::class);
     }
 
     public function clarifyingQuestion(): ClarifyingQuestionServiceContract
     {
-        // TODO: Implement clarifyingQuestion() method.
+        return app(ClarifyingQuestionServiceContract::class);
+    }
+
+    public function hasCompletedForEmployee(string $surveyId, string $userId, string $milestoneId): bool
+    {
+        $session = EmployeeSession::where([
+            'user_id', $userId,
+            'milestone_id' => $milestoneId,
+            'survey_id' => $surveyId,
+        ])
+            ->latest()
+            ->first();
+
+        if(is_null($session)) return false;
+
+        return $session->status === EmployeeSessionStatus::Finished;
+    }
+
+    public function hasActiveForEmployee(string $surveyId, string $userId, string $milestoneId): bool
+    {
+        $session = EmployeeSession::where([
+            'user_id', $userId,
+            'milestone_id' => $milestoneId,
+            'survey_id' => $surveyId,
+            'status' => EmployeeSessionStatus::Active,
+        ])
+            ->latest()
+            ->first();
+
+        return ! is_null($session);
+    }
+
+    /**
+     * Create or find survey session id for current employee
+     */
+    public function newEmployeeSession(
+        string $milestoneId,
+        string $surveyId,
+        string $userId,
+        string $orgId,
+    ): string
+    {
+        $session = EmployeeSession::firstOrCreate([
+            'milestone_id' => $milestoneId,
+            'survey_id' => $surveyId,
+            'user_id' => $userId,
+            'org_id' => $orgId,
+            'status' => EmployeeSessionStatus::Active,
+        ])
+            ->latest()
+            ->first();
+
+        if($session->wasRecentlyCreated) {
+            event(new CreatedSurveySessionEvent($session));
+        }
+
+        return $session->id;
+    }
+
+    public function getCurrentEmployeeQuestion(string $sessionId): CurrentEmployeeQuestionDTO|null
+    {
+        $session = EmployeeSession::with(['surveyResponse'])
+            ->where(['id' => $sessionId])
+            ->first();
+
+        if(is_null($session)) return null;
+
+        $answeredQuestions = $session->surveyResponse
+            ->where('response', '!==', '')
+            ->pluck('question_id')
+            ->toArray();
+
+        $question = Question::with(['answers'])
+            ->where([
+                'survey_id' => $session->survey_id,
+            ])
+            ->whereNotIn('id', $answeredQuestions)
+            ->first();
+
+        if(is_null($question)) return null;
+
+        $answers = array_map(fn($answer) => new CurrentEmployeeQuestionAnswerDTO(
+            id: $answer['id'],
+            clarifying: $answer['clarifying'] ?? '',
+            weight: $answer['weight'],
+        ), $question->answers->toArray());
+
+        return new CurrentEmployeeQuestionDTO(
+            id: $question->id,
+            text: $question->title,
+            answers: $answers
+        );
+    }
+
+    public function getAllForUser(int|string $userId): array
+    {
+        # TODO Узнать в каком формате вернуть
+        return Survey::where(['user_id' => $userId])
+            ->get();
     }
 
     public function createFromTemplate()
@@ -161,7 +160,7 @@ class SurveyService implements SurveyServiceContract
         // TODO: Implement getInfo() method.
     }
 
-    public function analytic(int $milestone): AnalyticDTO
+    public function analytic(string $milestone): AnalyticDTO
     {
         // TODO: Implement analytic() method.
     }
@@ -169,5 +168,18 @@ class SurveyService implements SurveyServiceContract
     public function getLimitations(int|string $userId): array
     {
         // TODO: Implement getLimitations() method.
+    }
+
+    public function createMilestone(string $surveyId, string $orgId, int $value): string
+    {
+        $milestone = Milestone::query()->create([
+            'survey_id' => $surveyId,
+            'org_id' => $orgId,
+            'value' => $value,
+        ]);
+
+        event(new CreatedMilestoneEvent($milestone));
+
+        return $milestone->id;
     }
 }

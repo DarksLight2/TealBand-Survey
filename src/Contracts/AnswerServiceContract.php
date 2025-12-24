@@ -9,5 +9,5 @@ use Tealband\Survey\Data\Question\CurrentEmployeeQuestionDTO;
 
 interface AnswerServiceContract
 {
-    public function employeeAnswer(int $answerId, string $sessionId): void;
+    public function employeeAnswer(string $answerId, string $sessionId): void;
 }

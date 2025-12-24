@@ -6,16 +6,19 @@ namespace Tealband\Survey\Services;
 
 use Tealband\Survey\Traits\CRUD;
 use Tealband\Survey\Models\Answer;
+use Tealband\Survey\Facades\Survey;
 use Tealband\Survey\Data\Answer\AnswerDTO;
+use Tealband\Survey\Models\EmployeeSession;
 use Tealband\Survey\Data\Answer\CreateAnswerDTO;
 use Tealband\Survey\Data\Answer\UpdateAnswerDTO;
-use Tealband\Survey\Models\EmployeeSessionAnswer;
-use Tealband\Survey\Data\Comment\CreateCommentDTO;
+use Tealband\Survey\Models\SurveyResponse;
+use Tealband\Survey\Data\Comment\CreateClarifyingQuestionDTO;
+use Tealband\Survey\Contracts\AnswerServiceContract;
 
 /**
  * @template-extends CRUD<CreateAnswerDTO, AnswerDTO, UpdateAnswerDTO>
  */
-class AnswerService
+class AnswerService implements AnswerServiceContract
 {
     use CRUD;
 
@@ -23,28 +26,29 @@ class AnswerService
     protected string $baseDTO = AnswerDTO::class;
 
     public function employeeAnswer(
-        int $answerId,
+        string $answerId,
         string $sessionId
     ): void
     {
         $answer = Answer::query()
-            ->with(['question:text'])
             ->find($answerId);
 
-        EmployeeSessionAnswer::query()
+        $session = EmployeeSession::query()->find($sessionId);
+
+        SurveyResponse::query()
             ->updateOrCreate([
+                'employee_session_id' => $session->id,
                 'question_id' => $answer->question_id,
-                'employee_session_id' => $sessionId
-            ], ['answer_id' => $answerId]);
-
-        $commentService = new CommentService();
-
-        if($answer->trigger_followup) {
-            $commentService->create(new CreateCommentDTO(
-                employeeSessionId: $sessionId,
-                answerId: $answerId,
-                questionText: $answer->init_followup_text,
-            ));
-        }
+            ], [
+                'answer_id' => $answerId,
+                'user_id' => $session->user_id,
+                'survey_id' => $session->survey_id,
+                'milestone_id' => $session->milestone_id,
+                'org_id' => $session->org_id,
+                'comment' => '',
+                'ai_clarifying' => '',
+                'response' => '',
+                'summary' => '',
+            ]);
     }
 }

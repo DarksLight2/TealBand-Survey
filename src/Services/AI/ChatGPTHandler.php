@@ -48,6 +48,6 @@ class ChatGPTHandler implements AiHandlerContract
             return '';
         }
 
-        return $response->json()['choices'][0];
+        return $response->json()['choices'][0]['message']['content'];
     }
 }

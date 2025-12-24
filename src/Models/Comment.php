@@ -3,16 +3,18 @@
 namespace Tealband\Survey\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Comment extends Model
 {
     protected $fillable = [
         'employee_session_id',
-        'question_text',
-        'answer_text',
+        'questions',
         'answer_id',
+    ];
+
+    protected $casts = [
+        'questions' => 'json',
     ];
 
     public function answer(): BelongsTo

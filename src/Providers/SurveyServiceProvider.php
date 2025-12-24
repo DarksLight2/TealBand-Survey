@@ -3,9 +3,11 @@
 namespace Tealband\Survey\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use TealBand\Survey\Services\SurveyService;
+use Tealband\Survey\Services\SurveyService;
 use Tealband\Survey\Services\AnswerService;
 use Tealband\Survey\Contracts\AnswerServiceContract;
+use Tealband\Survey\Services\ClarifyingQuestionService;
+use Tealband\Survey\Contracts\ClarifyingQuestionServiceContract;
 
 class SurveyServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,9 @@ class SurveyServiceProvider extends ServiceProvider
         });
         $this->app->singleton(AnswerServiceContract::class, function() {
             return new AnswerService();
+        });
+        $this->app->singleton(ClarifyingQuestionServiceContract::class, function() {
+            return new ClarifyingQuestionService();
         });
     }
 

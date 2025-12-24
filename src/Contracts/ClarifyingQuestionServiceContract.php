@@ -16,7 +16,9 @@ interface ClarifyingQuestionServiceContract
     public function generate(string $employeeSessionId): string;
 
     /**
-     * Attach user answer to current question and generate new
+     * Attach user answer to current question
      */
-    public function userAnswer(string $employeeSessionId, string $answer): string;
+    public function userAnswer(string $employeeSessionId, string $answer): void;
+
+    public function comment(string $employeeSessionId, string $comment): void;
 }

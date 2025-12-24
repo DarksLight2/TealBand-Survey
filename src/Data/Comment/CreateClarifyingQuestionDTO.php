@@ -6,7 +6,7 @@ namespace Tealband\Survey\Data\Comment;
 
 use Illuminate\Contracts\Support\Arrayable;
 
-readonly class CreateCommentDTO implements Arrayable
+readonly class CreateClarifyingQuestionDTO implements Arrayable
 {
     public function __construct(
         public string $employeeSessionId,

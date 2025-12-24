@@ -10,11 +10,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('questions', function (Blueprint $table) {
-            $table->id();
-            $table->string('text');
-            $table->string('language');
+            $table->ulid('id')->primary();
+            $table->string('title');
 
             $table->foreignIdFor(Survey::class);
+            $table->foreignIdFor(config('tealband-survey.models.org'), 'org_id');
+
+            $table->integer('type');
+
+            $table->json('keywords');
 
             $table->timestamps();
         });
