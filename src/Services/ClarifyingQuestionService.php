@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tealband\Survey\Services;
 
-use Illuminate\Support\Facades\DB;
 use Tealband\Survey\Facades\Survey;
 use Tealband\Survey\Services\AI\AiService;
 use Tealband\Survey\Models\SurveyResponse;
@@ -44,7 +43,7 @@ class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
     {
         $question = Survey::getCurrentEmployeeQuestion($employeeSessionId);
         $surveyResponse = SurveyResponse::query()
-//            ->with(['answer:clarifying,id,prompt'])
+            ->with(['answer:clarifying,id,prompt'])
             ->where([
                 'employee_session_id' => $employeeSessionId,
                 'question_id' => $question->id,

@@ -4,27 +4,13 @@ declare(strict_types=1);
 
 namespace Tealband\Survey\Services;
 
-use Tealband\Survey\Traits\CRUD;
 use Tealband\Survey\Models\Answer;
-use Tealband\Survey\Facades\Survey;
-use Tealband\Survey\Data\Answer\AnswerDTO;
-use Tealband\Survey\Models\EmployeeSession;
-use Tealband\Survey\Data\Answer\CreateAnswerDTO;
-use Tealband\Survey\Data\Answer\UpdateAnswerDTO;
 use Tealband\Survey\Models\SurveyResponse;
-use Tealband\Survey\Data\Comment\CreateClarifyingQuestionDTO;
+use Tealband\Survey\Models\EmployeeSession;
 use Tealband\Survey\Contracts\AnswerServiceContract;
 
-/**
- * @template-extends CRUD<CreateAnswerDTO, AnswerDTO, UpdateAnswerDTO>
- */
 class AnswerService implements AnswerServiceContract
 {
-    use CRUD;
-
-    protected string $model = Answer::class;
-    protected string $baseDTO = AnswerDTO::class;
-
     public function employeeAnswer(
         string $answerId,
         string $sessionId

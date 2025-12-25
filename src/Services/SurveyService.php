@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace Tealband\Survey\Services;
 
-use Tealband\Survey\Traits\CRUD;
 use Tealband\Survey\Models\Survey;
-use Tealband\Survey\Traits\Logger;
-use Tealband\Survey\Models\Answer;
 use Tealband\Survey\Models\Question;
 use Tealband\Survey\Models\Milestone;
-use Tealband\Survey\Data\Survey\SurveyDTO;
 use Tealband\Survey\Models\EmployeeSession;
 use Tealband\Survey\Data\Survey\AnalyticDTO;
 use Tealband\Survey\Data\Survey\SurveyInfoDTO;
-use Tealband\Survey\Data\Survey\CreateSurveyDTO;
-use Tealband\Survey\Data\Survey\UpdateSurveyDTO;
 use Tealband\Survey\Enums\EmployeeSessionStatus;
 use Tealband\Survey\Events\CreatedMilestoneEvent;
 use Tealband\Survey\Contracts\SurveyServiceContract;
@@ -26,16 +20,8 @@ use Tealband\Survey\Data\Question\CurrentEmployeeQuestionDTO;
 use Tealband\Survey\Contracts\ClarifyingQuestionServiceContract;
 use Tealband\Survey\Data\Question\CurrentEmployeeQuestionAnswerDTO;
 
-/**
- * @template-extends CRUD<CreateSurveyDTO, SurveyDTO, UpdateSurveyDTO>
- */
 class SurveyService implements SurveyServiceContract
 {
-    use CRUD;
-    use Logger;
-
-    protected string $model   = Survey::class;
-    protected string $baseDTO = SurveyDTO::class;
 
     public function answer(): AnswerServiceContract
     {
