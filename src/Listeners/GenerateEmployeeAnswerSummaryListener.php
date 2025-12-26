@@ -12,7 +12,6 @@ class GenerateEmployeeAnswerSummaryListener
     public function handle(SavedClarifyResponseEvent|EmployeeAnswerSavedWithoutClarifyingEvent $event): void
     {
         $event->surveyResponse->summary = Survey::summarizer()->employeeAnswerSummary($event->surveyResponse->id);
-        $event->surveyResponse->status = SurveyResponseStatus::Closed;
         $event->surveyResponse->save();
     }
 }

@@ -44,6 +44,7 @@ class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
                 $aiClarifying = $data['content'];
             } else {
                 event(new EmployeeAnswerSavedWithoutClarifyingEvent($surveyResponse));
+                Survey::markSurveyResponseAsClosed($surveyResponse);
                 return '';
             }
         }
