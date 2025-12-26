@@ -23,18 +23,15 @@ class SurveyServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton('survey', function() {
-            return new SurveyService();
-        });
-        $this->app->singleton(AnswerServiceContract::class, function() {
-            return new AnswerService();
-        });
-        $this->app->singleton(ClarifyingQuestionServiceContract::class, function() {
-            return new ClarifyingQuestionService();
-        });
-        $this->app->singleton(SummarizerServiceContract::class, function() {
-            return new SummarizerService();
-        });
+        $this->mergeConfigFrom(
+            __DIR__ . '/../../config/tealband-survey.php',
+            'tealband-survey'
+        );
+
+        $this->app->singleton('survey', fn () => new SurveyService());
+        $this->app->singleton(AnswerServiceContract::class, fn () => new AnswerService());
+        $this->app->singleton(ClarifyingQuestionServiceContract::class, fn () => new ClarifyingQuestionService());
+        $this->app->singleton(SummarizerServiceContract::class, fn () => new SummarizerService());
     }
 
     public function boot(): void
@@ -42,7 +39,7 @@ class SurveyServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../../migrations/');
         $this->publishes([
             __DIR__ . '/../../config/tealband-survey.php' => config_path('tealband-survey.php'),
-        ]);
+        ], 'tealband-survey-config');
 
         Event::listen(
             EmployeeAnswerSavedWithoutClarifyingEvent::class,
