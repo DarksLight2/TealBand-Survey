@@ -8,38 +8,47 @@ use Tealband\Survey\Services\AI\Contracts\AiHandlerContract;
 
 class AiService
 {
-    public static function make(): AiHandlerContract
+    private static function make(string|array $provider): AiHandlerContract
     {
-        return app(config('tealband-survey.ai.provider.handler'));
+        if(is_array($provider)) {
+            return app($provider['handler'], $provider);
+        } elseif ($provider === 'default') {
+            $defaultProvider = config('tealband-survey.ai.provider');
+            $currentProvider = config("tealband-survey.ai.providers.$defaultProvider");
+            return app($currentProvider['handler'], ['opts' => $currentProvider]);
+        } else {
+            $currentProvider = config("tealband-survey.ai.providers.$provider");
+            return app($currentProvider['handler'], ['opts' => $currentProvider]);
+        }
     }
 
     public static function clarifyingQuestion(): AiHandlerContract
     {
-        return app(config('tealband-survey.ai.provider.handler'));
+        return self::make(config('tealband-survey.clarifying-question.provider'));
     }
 
     public static function employeeSessionSummarizer(): AiHandlerContract
     {
-        return app(config('tealband-survey.ai.provider.handler'));
+        return self::make(config('tealband-survey.summarizers.employee-answer.provider'));
     }
 
     public static function commonEmployeesSummarizer(): AiHandlerContract
     {
-        return app(config('tealband-survey.ai.provider.handler'));
+        return self::make(config('tealband-survey.summarizers.common-employees.provider'));
     }
 
     public static function questionsTypeSummarizer(): AiHandlerContract
     {
-        return app(config('tealband-survey.ai.provider.handler'));
+        return self::make(config('tealband-survey.summarizers.questions-type.provider'));
     }
 
     public static function questionSummarizer(): AiHandlerContract
     {
-        return app(config('tealband-survey.ai.provider.handler'));
+        return self::make(config('tealband-survey.summarizers.summarizers.question.provider'));
     }
 
     public static function detailedQuestionSummarizer(): AiHandlerContract
     {
-        return app(config('tealband-survey.ai.provider.handler'));
+        return self::make(config('tealband-survey.summarizers.detailed-question.provider'));
     }
 }

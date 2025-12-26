@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\ConnectionException;
 use Tealband\Survey\Services\AI\Contracts\AiHandlerContract;
 
-readonly class ChatGPTHandler implements AiHandlerContract
+readonly class ClaudeHandler implements AiHandlerContract
 {
     public function __construct(
         public array $opts,
@@ -20,16 +20,20 @@ readonly class ChatGPTHandler implements AiHandlerContract
         $apiKey = $this->opts['token'];
         $messages = is_array($prompt) ? $prompt : [['role' => 'user', 'content' => $prompt]];
 
+        [$user, $system] = $this->explodeMessageRoles($messages);
+
         try {
             $response = Http::withHeaders([
-                'Authorization' => "Bearer $apiKey",
-                'Content-Type'  => 'application/json',
+                'x-api-key' => $apiKey,
+                'anthropic-version' => '2023-06-01',
+                'content-type' => 'application/json',
             ])
                 ->timeout($this->opts['timeout'])
-                ->post('https://api.openai.com/v1/chat/completions', [
+                ->post('https://api.anthropic.com/v1/messages', [
                     'model'       => $this->opts['model'],
-                    'max_completion_tokens' => $this->opts['max_tokens'],
-                    'messages'    => $messages,
+                    'max_tokens' => $this->opts['max_tokens'],
+                    'system' => $system,
+                    'messages'    => $user,
                     'temperature' => $this->opts['temperature'],
                 ]);
         } catch (ConnectionException $e) {
@@ -42,7 +46,7 @@ readonly class ChatGPTHandler implements AiHandlerContract
 
         $body = $response->json();
 
-        if(! $response->successful() || empty($body['choices'])) {
+        if(! $response->successful() || empty($body['content'])) {
             Log::warning('AI handler returned an unsuccessful response.', [
                 'response' => $response->json(),
             ]);
@@ -50,6 +54,29 @@ readonly class ChatGPTHandler implements AiHandlerContract
             return '';
         }
 
-        return $response->json()['choices'][0]['message']['content'];
+        $text = '';
+        foreach ($body['content'] as $block) {
+            if (($block['type'] ?? null) === 'text') {
+                $text .= $block['text'];
+            }
+        }
+
+        return $text;
+    }
+
+    private function explodeMessageRoles(array $messages): array
+    {
+        $systemParts = [];
+        $userMessages = [];
+
+        foreach ($messages as $message) {
+            if($message['role'] === 'user') {
+                $userMessages[] = $message;
+            } else {
+                $systemParts[] = $message['content'];
+            }
+        }
+
+        return [$userMessages, implode("\n\n", $systemParts)];
     }
 }
