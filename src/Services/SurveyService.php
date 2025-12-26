@@ -7,30 +7,31 @@ namespace Tealband\Survey\Services;
 use Tealband\Survey\Models\Survey;
 use Tealband\Survey\Models\Question;
 use Tealband\Survey\Models\Milestone;
+use Tealband\Survey\Models\SurveyResponse;
 use Tealband\Survey\Models\EmployeeSession;
-use Tealband\Survey\Data\Survey\AnalyticDTO;
-use Tealband\Survey\Data\Survey\SurveyInfoDTO;
+use Tealband\Survey\Enums\SurveyResponseStatus;
 use Tealband\Survey\Enums\EmployeeSessionStatus;
 use Tealband\Survey\Events\CreatedMilestoneEvent;
 use Tealband\Survey\Contracts\SurveyServiceContract;
 use Tealband\Survey\Contracts\AnswerServiceContract;
-use Tealband\Survey\Contracts\SummaryServiceContract;
+use Tealband\Survey\Events\SurveyQuestionsIsEndEvent;
+use Tealband\Survey\Contracts\SummarizerServiceContract;
 use Tealband\Survey\Events\CreatedSurveySessionEvent;
+use Tealband\Survey\Events\EmployeeSessionIsFinishedEvent;
 use Tealband\Survey\Data\Question\CurrentEmployeeQuestionDTO;
 use Tealband\Survey\Contracts\ClarifyingQuestionServiceContract;
 use Tealband\Survey\Data\Question\CurrentEmployeeQuestionAnswerDTO;
 
 class SurveyService implements SurveyServiceContract
 {
+    public function summarizer(): SummarizerServiceContract
+    {
+        return app(SummarizerServiceContract::class);
+    }
 
     public function answer(): AnswerServiceContract
     {
         return app(AnswerServiceContract::class);
-    }
-
-    public function summary(): SummaryServiceContract
-    {
-        return app(SummaryServiceContract::class);
     }
 
     public function clarifyingQuestion(): ClarifyingQuestionServiceContract
@@ -41,7 +42,7 @@ class SurveyService implements SurveyServiceContract
     public function hasCompletedForEmployee(string $surveyId, string $userId, string $milestoneId): bool
     {
         $session = EmployeeSession::where([
-            'user_id', $userId,
+            'user_id' => $userId,
             'milestone_id' => $milestoneId,
             'survey_id' => $surveyId,
         ])
@@ -53,10 +54,22 @@ class SurveyService implements SurveyServiceContract
         return $session->status === EmployeeSessionStatus::Finished;
     }
 
+    public function markSessionIsFinished(string|EmployeeSession $session): void
+    {
+        if(is_string($session)) {
+            $session = EmployeeSession::find($session);
+        }
+
+        $session->status = EmployeeSessionStatus::Finished;
+        $session->save();
+
+        event(new EmployeeSessionIsFinishedEvent($session));
+    }
+
     public function hasActiveForEmployee(string $surveyId, string $userId, string $milestoneId): bool
     {
         $session = EmployeeSession::where([
-            'user_id', $userId,
+            'user_id' => $userId,
             'milestone_id' => $milestoneId,
             'survey_id' => $surveyId,
             'status' => EmployeeSessionStatus::Active,
@@ -94,18 +107,28 @@ class SurveyService implements SurveyServiceContract
         return $session->id;
     }
 
+    public function markSurveyResponseAsClosed(SurveyResponse $response, bool $withSaving = true): void
+    {
+        $response->status = SurveyResponseStatus::Closed;
+        if($withSaving) $response->save();
+    }
+
     public function getCurrentEmployeeQuestion(string $sessionId): CurrentEmployeeQuestionDTO|null
     {
-        $session = EmployeeSession::with(['surveyResponse'])
+        $session = EmployeeSession::with(['surveyResponse.answer'])
             ->where(['id' => $sessionId])
             ->first();
 
         if(is_null($session)) return null;
 
         $answeredQuestions = $session->surveyResponse
-            ->where('response', '!==', '')
+            ->where('status', SurveyResponseStatus::Closed)
             ->pluck('question_id')
+            ->values()
             ->toArray();
+
+        $questionsAmount = Question::where(['survey_id' => $session->survey_id,])
+            ->count();
 
         $question = Question::with(['answers'])
             ->where([
@@ -114,7 +137,10 @@ class SurveyService implements SurveyServiceContract
             ->whereNotIn('id', $answeredQuestions)
             ->first();
 
-        if(is_null($question)) return null;
+        if(is_null($question)) {
+            event(new SurveyQuestionsIsEndEvent($session));
+            return null;
+        }
 
         $answers = array_map(fn($answer) => new CurrentEmployeeQuestionAnswerDTO(
             id: $answer['id'],
@@ -125,7 +151,10 @@ class SurveyService implements SurveyServiceContract
         return new CurrentEmployeeQuestionDTO(
             id: $question->id,
             text: $question->title,
-            answers: $answers
+            keywords: $question->keywords,
+            answers: $answers,
+            currentQuestionIndex: count($answeredQuestions) + 1,
+            amountQuestions: $questionsAmount,
         );
     }
 
@@ -141,12 +170,12 @@ class SurveyService implements SurveyServiceContract
         // TODO: Implement createFromTemplate() method.
     }
 
-    public function getInfo(int $surveyId): SurveyInfoDTO
+    public function getInfo(int $surveyId)
     {
         // TODO: Implement getInfo() method.
     }
 
-    public function analytic(string $milestone): AnalyticDTO
+    public function analytic(string $milestone)
     {
         // TODO: Implement analytic() method.
     }

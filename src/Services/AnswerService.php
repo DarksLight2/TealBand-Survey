@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Tealband\Survey\Services;
 
 use Tealband\Survey\Models\Answer;
+use Tealband\Survey\Facades\Survey;
 use Tealband\Survey\Models\SurveyResponse;
 use Tealband\Survey\Models\EmployeeSession;
+use Tealband\Survey\Enums\SurveyResponseStatus;
 use Tealband\Survey\Contracts\AnswerServiceContract;
+use Tealband\Survey\Events\EmployeeAnswerSavedWithoutClarifyingEvent;
 
 class AnswerService implements AnswerServiceContract
 {
@@ -21,7 +24,7 @@ class AnswerService implements AnswerServiceContract
 
         $session = EmployeeSession::query()->find($sessionId);
 
-        SurveyResponse::query()
+        $response = SurveyResponse::query()
             ->updateOrCreate([
                 'employee_session_id' => $session->id,
                 'question_id' => $answer->question_id,
@@ -35,6 +38,12 @@ class AnswerService implements AnswerServiceContract
                 'ai_clarifying' => '',
                 'response' => '',
                 'summary' => '',
+                'status' => SurveyResponseStatus::Active->value,
             ]);
+
+        if(is_null($answer->clarifying)) {
+            event(new EmployeeAnswerSavedWithoutClarifyingEvent($response));
+            Survey::markSurveyResponseAsClosed($response);
+        }
     }
 }

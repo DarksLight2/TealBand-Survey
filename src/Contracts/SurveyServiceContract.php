@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace Tealband\Survey\Contracts;
 
-use Tealband\Survey\Data\LimitationDTO;
-use Tealband\Survey\Data\Survey\AnalyticDTO;
-use Tealband\Survey\Data\Survey\SurveyInfoDTO;
+use Tealband\Survey\Models\SurveyResponse;
+use Tealband\Survey\Models\EmployeeSession;
 use Tealband\Survey\Data\Question\CurrentEmployeeQuestionDTO;
 
 interface SurveyServiceContract
 {
+    public function summarizer(): SummarizerServiceContract;
+
     /** Access to answer business logic */
     public function answer(): AnswerServiceContract;
-
-    /** Access to summary business logic */
-    public function summary(): SummaryServiceContract;
 
     /** Access to clarifying question business logic */
     public function clarifyingQuestion(): ClarifyingQuestionServiceContract;
@@ -28,18 +26,19 @@ interface SurveyServiceContract
 
     public function createMilestone(string $surveyId, string $orgId, int $value): string;
 
+    public function markSessionIsFinished(string|EmployeeSession $session): void;
+
+    public function markSurveyResponseAsClosed(SurveyResponse $response, bool $withSaving = true): void;
+
     public function getAllForUser(int|string $userId): array;
 
     /** ON FUTURE */
     public function createFromTemplate();
 
-    public function getInfo(int $surveyId): SurveyInfoDTO;
+    public function getInfo(int $surveyId);
 
-    public function analytic(string $milestone): AnalyticDTO;
+    public function analytic(string $milestone);
 
-    /**
-     * @return LimitationDTO[]
-     */
     public function getLimitations(int|string $userId): array;
 
     /**

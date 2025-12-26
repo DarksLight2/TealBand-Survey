@@ -11,10 +11,11 @@ use Tealband\Survey\Services\AI\Contracts\AiHandlerContract;
 
 class ChatGPTHandler implements AiHandlerContract
 {
-    public function handle(string $prompt): string
+    public function handle(string|array $prompt): string
     {
         $aiConfig = config('tealband-survey.ai.provider');
         $apiKey = $aiConfig['token'];
+        $messages = is_array($prompt) ? $prompt : [['role' => 'user', 'content' => $prompt]];
 
         try {
             $response = Http::withHeaders([
@@ -25,9 +26,7 @@ class ChatGPTHandler implements AiHandlerContract
                 ->post('https://api.openai.com/v1/chat/completions', [
                     'model'       => $aiConfig['model'],
                     'max_completion_tokens' => $aiConfig['max_tokens'],
-                    'messages'    => [
-                        ['role' => 'user', 'content' => $prompt],
-                    ],
+                    'messages'    => $messages,
                     'temperature' => $aiConfig['temperature'],
                 ]);
         } catch (ConnectException $e) {

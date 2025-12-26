@@ -12,4 +12,34 @@ class AiService
     {
         return app(config('tealband-survey.ai.provider.handler'));
     }
+
+    public static function clarifyingQuestion(): AiHandlerContract
+    {
+        return app(config('tealband-survey.ai.provider.handler'));
+    }
+
+    public static function employeeSessionSummarizer(): AiHandlerContract
+    {
+        return app(config('tealband-survey.ai.provider.handler'));
+    }
+
+    public static function commonEmployeesSummarizer(): AiHandlerContract
+    {
+        return app(config('tealband-survey.ai.provider.handler'));
+    }
+
+    public static function questionsTypeSummarizer(): AiHandlerContract
+    {
+        return app(config('tealband-survey.ai.provider.handler'));
+    }
+
+    public static function questionSummarizer(): AiHandlerContract
+    {
+        return app(config('tealband-survey.ai.provider.handler'));
+    }
+
+    public static function detailedQuestionSummarizer(): AiHandlerContract
+    {
+        return app(config('tealband-survey.ai.provider.handler'));
+    }
 }

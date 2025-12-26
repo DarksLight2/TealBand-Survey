@@ -10,6 +10,7 @@ use Tealband\Survey\Models\SurveyResponse;
 use Tealband\Survey\Events\SavedClarifyResponseEvent;
 use Tealband\Survey\Events\GeneratedClarifyQuestionEvent;
 use Tealband\Survey\Contracts\ClarifyingQuestionServiceContract;
+use Tealband\Survey\Events\EmployeeAnswerSavedWithoutClarifyingEvent;
 
 class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
 {
@@ -18,9 +19,10 @@ class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
      */
     public function generate(string $employeeSessionId): string
     {
+        $aiClarifying = '';
         $question = Survey::getCurrentEmployeeQuestion($employeeSessionId);
         $surveyResponse = SurveyResponse::query()
-            ->with(['answer:clarifying,id,prompt'])
+            ->with(['answer:clarifying,id,prompt,weight'])
             ->where([
                 'employee_session_id' => $employeeSessionId,
                 'question_id' => $question->id,
@@ -28,8 +30,23 @@ class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
             ->latest()
             ->first();
 
-        $text = "Q1: {$surveyResponse->answer->clarifying}; A1: $surveyResponse->comment";
-        $aiClarifying = AiService::make()->handle("{$surveyResponse->answer->prompt} $text");
+        $text = "Main question: $question->text; Clarifying question: {$surveyResponse->answer->clarifying}; Clarifying answer: $surveyResponse->comment; Weight: {$surveyResponse->answer->weight}";
+        $prompts = [
+            ['role' => 'system', 'content' => $surveyResponse->answer->prompt],
+            ['role' => 'user', 'content' => $text],
+        ];
+
+        $response = AiService::clarifyingQuestion()->handle(array_merge(config('tealband-survey.clarifying-question.prompts'), $prompts));
+
+        if(json_validate($response)) {
+            $data = json_decode($response, true);
+            if($data['need_clarifying']) {
+                $aiClarifying = $data['content'];
+            } else {
+                event(new EmployeeAnswerSavedWithoutClarifyingEvent($surveyResponse));
+                return '';
+            }
+        }
 
         $surveyResponse->ai_clarifying = $aiClarifying;
         $surveyResponse->save();
@@ -70,6 +87,7 @@ class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
             ->first();
 
         $surveyResponse->response = $answer;
+        Survey::markSurveyResponseAsClosed($surveyResponse, false);
         $surveyResponse->save();
 
         event(new SavedClarifyResponseEvent($surveyResponse));

@@ -26,6 +26,7 @@ return new class extends Migration
             $table->longText('ai_clarifying')->default('');
             $table->longText('response')->default('');
             $table->longText('summary')->default('');
+            $table->unsignedTinyInteger('status');
             $table->timestamps();
         });
     }
