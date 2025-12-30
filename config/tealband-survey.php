@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\User;
 use App\Models\Organization;
 use Tealband\Survey\Services\AI\ClaudeHandler;
+use Tealband\Survey\Services\AI\YandexHandler;
 use Tealband\Survey\Services\AI\ChatGPTHandler;
 
 return [
@@ -20,6 +21,7 @@ return [
                 'temperature' => 1,
                 'timeout' => 60,
                 'max_tokens' => 4096,
+                'url' => env('CHATGPT_URL'),
                 'token' => env('CHATGPT_TOKEN'),
                 'handler' => ChatGPTHandler::class,
             ],
@@ -28,8 +30,19 @@ return [
                 'temperature' => 0.5,
                 'timeout' => 60,
                 'max_tokens' => 4096,
+                'url' => env('YANDEX_URL'),
                 'token' => env('CLAUDE_TOKEN'),
                 'handler' => ClaudeHandler::class,
+            ],
+            'yandex' => [
+                'model' => 'gpt://' . env('YANDEX_FOLDER') . '/yandexgpt/latest',
+                'temperature' => 0.5,
+                'timeout' => 60,
+                'max_tokens' => 4096,
+                'url' => env('YANDEX_GPT_URL'),
+                'token' => env('YANDEX_TOKEN'),
+                'folder-id' => env('YANDEX_FOLDER'),
+                'handler' => YandexHandler::class,
             ],
         ]
     ],
