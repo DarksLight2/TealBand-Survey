@@ -17,7 +17,8 @@ readonly class ClaudeHandler implements AiHandlerContract
 
     public function handle(string|array $prompt): string
     {
-        $apiKey = $this->opts['token'];
+        $apiKey   = $this->opts['token'];
+        $url      = $this->opts['url'];
         $messages = is_array($prompt) ? $prompt : [['role' => 'user', 'content' => $prompt]];
 
         [$user, $system] = $this->explodeMessageRoles($messages);
@@ -29,7 +30,7 @@ readonly class ClaudeHandler implements AiHandlerContract
                 'content-type' => 'application/json',
             ])
                 ->timeout($this->opts['timeout'])
-                ->post('https://api.anthropic.com/v1/messages', [
+                ->post($url, [
                     'model'       => $this->opts['model'],
                     'max_tokens' => $this->opts['max_tokens'],
                     'system' => $system,

@@ -18,6 +18,7 @@ readonly class ChatGPTHandler implements AiHandlerContract
     public function handle(string|array $prompt): string
     {
         $apiKey = $this->opts['token'];
+        $url = $this->opts['url'];
         $messages = is_array($prompt) ? $prompt : [['role' => 'user', 'content' => $prompt]];
 
         try {
@@ -26,7 +27,7 @@ readonly class ChatGPTHandler implements AiHandlerContract
                 'Content-Type'  => 'application/json',
             ])
                 ->timeout($this->opts['timeout'])
-                ->post('https://api.openai.com/v1/chat/completions', [
+                ->post($url, [
                     'model'       => $this->opts['model'],
                     'max_completion_tokens' => $this->opts['max_tokens'],
                     'messages'    => $messages,
