@@ -39,6 +39,20 @@ class SurveyService implements SurveyServiceContract
         return app(ClarifyingQuestionServiceContract::class);
     }
 
+    public function getCurrentEmployeeSessionId(string $userId, string $milestoneId): string|null
+    {
+        $session = EmployeeSession::where([
+            'user_id' => $userId,
+            'milestone_id' => $milestoneId,
+            'status' => EmployeeSessionStatus::Active
+        ])
+            ->latest()
+            ->first();
+
+        return $session?->id;
+
+    }
+
     public function hasCompletedForEmployee(string $surveyId, string $userId, string $milestoneId): bool
     {
         $session = EmployeeSession::where([

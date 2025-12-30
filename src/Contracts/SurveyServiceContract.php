@@ -20,6 +20,8 @@ interface SurveyServiceContract
 
     public function getCurrentEmployeeQuestion(string $sessionId): CurrentEmployeeQuestionDTO|null;
 
+    public function getCurrentEmployeeSessionId(string $userId, string $milestoneId): string|null;
+
     public function hasCompletedForEmployee(string $surveyId, string $userId, string $milestoneId): bool;
 
     public function hasActiveForEmployee(string $surveyId, string $userId, string $milestoneId): bool;
