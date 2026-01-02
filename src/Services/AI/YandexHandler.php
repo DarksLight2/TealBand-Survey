@@ -55,7 +55,7 @@ readonly class YandexHandler implements AiHandlerContract
 
         $text = $body['result']['alternatives'][0]['message']['text'] ?? null;
 
-        return is_string($text) ? $text : '';
+        return is_string($text) ? str($text)->beforeLast('}')->after('{')->prepend('{')->append('}')->value() : '';
     }
 
     /**
