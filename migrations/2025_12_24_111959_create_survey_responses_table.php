@@ -22,10 +22,10 @@ return new class extends Migration
             $table->foreignIdFor(Question::class);
             $table->foreignIdFor(Answer::class);
             $table->foreignIdFor(EmployeeSession::class);
-            $table->longText('comment')->default('');
-            $table->longText('ai_clarifying')->default('');
-            $table->longText('response')->default('');
-            $table->longText('summary')->default('');
+            $table->longText('comment')->nullable();
+            $table->longText('ai_clarifying')->nullable();
+            $table->longText('response')->nullable();
+            $table->longText('summary')->nullable();
             $table->unsignedTinyInteger('status');
             $table->timestamps();
         });

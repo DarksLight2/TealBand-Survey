@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('surveys', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('title');
-            $table->string('version');
+            $table->string('version')->nullable();
 
             $table->foreignIdFor(config('tealband-survey.models.user'), 'user_id');
             $table->foreignIdFor(config('tealband-survey.models.org'), 'org_id');

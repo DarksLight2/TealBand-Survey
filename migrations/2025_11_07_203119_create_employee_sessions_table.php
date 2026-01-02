@@ -14,8 +14,8 @@ return new class extends Migration
             $table->ulid('id')->primary();
 
             $table->integer('status');
-            $table->longText('comment')->default('');
-            $table->longText('summary')->default('');
+            $table->string('comment')->nullable();
+            $table->string('summary')->nullable();
 
             $table->foreignIdFor(Survey::class);
             $table->foreignIdFor(Milestone::class);

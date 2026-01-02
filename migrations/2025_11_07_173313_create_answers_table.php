@@ -13,7 +13,7 @@ return new class extends Migration
         Schema::create('answers', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('clarifying')->nullable();
-            $table->longText('prompt')->nullable();
+            $table->string('comment');
             $table->integer('weight');
 
             $table->foreignIdFor(Question::class);

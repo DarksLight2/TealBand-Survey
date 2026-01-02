@@ -17,9 +17,9 @@ return new class extends Migration
             $table->foreignIdFor(config('tealband-survey.models.org'), 'org_id');
 
             $table->integer('type');
-
             $table->json('keywords');
-
+            $table->string('intent');
+            $table->string('instruction');
             $table->timestamps();
         });
     }
