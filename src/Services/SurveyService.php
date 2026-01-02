@@ -165,6 +165,7 @@ class SurveyService implements SurveyServiceContract
         $answers = array_map(fn($answer) => new CurrentEmployeeQuestionAnswerDTO(
             id: $answer['id'],
             clarifying: $answer['clarifying'] ?? '',
+            comment: $answer['comment'] ?? '',
             weight: $answer['weight'],
         ), $question->answers->toArray());
 

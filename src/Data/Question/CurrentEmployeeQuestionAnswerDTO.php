@@ -11,6 +11,7 @@ readonly class CurrentEmployeeQuestionAnswerDTO implements Arrayable
     public function __construct(
         public string $id,
         public string $clarifying,
+        public string $comment,
         public int $weight,
     ) {}
 
@@ -19,6 +20,7 @@ readonly class CurrentEmployeeQuestionAnswerDTO implements Arrayable
         return [
             'id' => $this->id,
             'clarifying' => $this->clarifying,
+            'comment' => $this->comment,
             'weight' => $this->weight,
         ];
     }
