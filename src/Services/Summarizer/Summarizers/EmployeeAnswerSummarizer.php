@@ -28,6 +28,7 @@ class EmployeeAnswerSummarizer
     private function prepareData(SurveyResponse $surveyResponse): array
     {
         return [
+            'User comment' => $surveyResponse->answer->comment,
             'Question title' => $surveyResponse->question->title,
             'Answer weight' => $surveyResponse->answer->weight,
             'First clarifying question' => $surveyResponse->answer->clarifying,

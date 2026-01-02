@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tealband\Survey\Services;
 
 use Tealband\Survey\Facades\Survey;
+use Tealband\Survey\Models\Question;
 use Tealband\Survey\Services\AI\AiService;
 use Tealband\Survey\Models\SurveyResponse;
 use Tealband\Survey\Events\SavedClarifyResponseEvent;
@@ -15,12 +16,15 @@ use Tealband\Survey\Events\EmployeeAnswerSavedWithoutClarifyingEvent;
 class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
 {
     /**
+     * @event SurveyQuestionsIsEndEvent
      * @event GeneratedClarifyQuestionEvent
+     * @event EmployeeAnswerSavedWithoutClarifyingEvent
      */
     public function generate(string $employeeSessionId): string
     {
         $aiClarifying = '';
         $question = Survey::getCurrentEmployeeQuestion($employeeSessionId);
+        $questionIntent = Question::query()->select('intent')->find($question->id)->intent;
         $surveyResponse = SurveyResponse::query()
             ->with(['answer:clarifying,id,prompt,weight'])
             ->where([
@@ -30,9 +34,9 @@ class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
             ->latest()
             ->first();
 
-        $text = "Main question: $question->text; Clarifying question: {$surveyResponse->answer->clarifying}; Clarifying answer: $surveyResponse->comment; Weight: {$surveyResponse->answer->weight}";
+        $text = "Main question: $question->text; Clarifying question: {$surveyResponse->answer->clarifying}; Clarifying answer: $surveyResponse->comment; Weight: {$surveyResponse->answer->weight}; User answer comment: {$surveyResponse->answer->comment};";
         $prompts = [
-            ['role' => 'system', 'content' => $surveyResponse->answer->prompt],
+            ['role' => 'system', 'content' => $questionIntent],
             ['role' => 'user', 'content' => $text],
         ];
 
@@ -57,6 +61,9 @@ class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
         return $aiClarifying;
     }
 
+    /**
+     * @event SurveyQuestionsIsEndEvent
+     */
     public function comment(string $employeeSessionId, string $comment): void
     {
         $question = Survey::getCurrentEmployeeQuestion($employeeSessionId);
@@ -75,6 +82,7 @@ class ClarifyingQuestionService implements ClarifyingQuestionServiceContract
 
     /**
      * @event SavedClarifyResponseEvent
+     * @event SurveyQuestionsIsEndEvent
      */
     public function userAnswer(string $employeeSessionId, string $answer): void
     {

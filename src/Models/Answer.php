@@ -11,7 +11,7 @@ class Answer extends Model
     use HasUlids;
 
     protected $fillable = [
-        'prompt',
+        'comment',
         'weight',
         'clarifying',
         'question_id',

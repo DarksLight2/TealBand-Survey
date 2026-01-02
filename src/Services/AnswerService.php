@@ -10,10 +10,15 @@ use Tealband\Survey\Models\SurveyResponse;
 use Tealband\Survey\Models\EmployeeSession;
 use Tealband\Survey\Enums\SurveyResponseStatus;
 use Tealband\Survey\Contracts\AnswerServiceContract;
+use Tealband\Survey\Events\EmployeeAnswerSavedEvent;
 use Tealband\Survey\Events\EmployeeAnswerSavedWithoutClarifyingEvent;
 
 class AnswerService implements AnswerServiceContract
 {
+    /**
+     * @event EmployeeAnswerSavedEvent
+     * @event EmployeeAnswerSavedWithoutClarifyingEvent
+     */
     public function employeeAnswer(
         string $answerId,
         string $sessionId
@@ -40,6 +45,8 @@ class AnswerService implements AnswerServiceContract
                 'summary' => '',
                 'status' => SurveyResponseStatus::Active->value,
             ]);
+
+        event(new EmployeeAnswerSavedEvent($response));
 
         if(is_null($answer->clarifying)) {
             event(new EmployeeAnswerSavedWithoutClarifyingEvent($response));

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('type');
             $table->json('keywords');
             $table->string('intent');
-            $table->string('instruction');
+            $table->text('instruction');
             $table->timestamps();
         });
     }

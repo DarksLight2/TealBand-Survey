@@ -13,6 +13,10 @@ use Tealband\Survey\Services\Summarizer\Enums\CommonEmployeesSummarizerType;
 
 class CommonEmployeesSummarizer
 {
+    /**
+     * @event GeneratedCommonOrganizationSummaryEvent
+     * @event GeneratedCommonTeamSummaryEvent
+     */
     public function handle(array $employeeIds, string $orgId, CommonEmployeesSummarizerType $type): string|null
     {
         if(empty($employeeIds)) return null;

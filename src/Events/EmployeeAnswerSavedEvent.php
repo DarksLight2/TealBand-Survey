@@ -7,7 +7,7 @@ use Tealband\Survey\Models\SurveyResponse;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 
-class EmployeeAnswerSavedWithoutClarifyingEvent
+class EmployeeAnswerSavedEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

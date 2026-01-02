@@ -68,6 +68,9 @@ class SurveyService implements SurveyServiceContract
         return $session->status === EmployeeSessionStatus::Finished;
     }
 
+    /**
+     * @event EmployeeSessionIsFinishedEvent
+     */
     public function markSessionIsFinished(string|EmployeeSession $session): void
     {
         if(is_string($session)) {
@@ -95,7 +98,7 @@ class SurveyService implements SurveyServiceContract
     }
 
     /**
-     * Create or find survey session id for current employee
+     * @event CreatedSurveySessionEvent
      */
     public function newEmployeeSession(
         string $milestoneId,
@@ -127,6 +130,9 @@ class SurveyService implements SurveyServiceContract
         if($withSaving) $response->save();
     }
 
+    /**
+     * @event SurveyQuestionsIsEndEvent
+     */
     public function getCurrentEmployeeQuestion(string $sessionId): CurrentEmployeeQuestionDTO|null
     {
         $session = EmployeeSession::with(['surveyResponse.answer'])
@@ -199,6 +205,9 @@ class SurveyService implements SurveyServiceContract
         // TODO: Implement getLimitations() method.
     }
 
+    /**
+     * @event CreatedMilestoneEvent
+     */
     public function createMilestone(string $surveyId, string $orgId, int $value): string
     {
         $milestone = Milestone::query()->create([

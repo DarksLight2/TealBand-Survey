@@ -27,6 +27,7 @@ class DetailedQuestionSummarizer
         $data = json_encode($this->prepareData($responses), JSON_UNESCAPED_UNICODE);
 
         $prompts = [
+            ['role' => 'system', 'content' => $question->instruction],
             ['role' => 'user', 'content' => $data],
         ];
 

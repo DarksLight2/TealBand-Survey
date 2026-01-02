@@ -18,6 +18,8 @@ class Question extends Model
         'org_id',
         'keywords',
         'type',
+        'intent',
+        'instruction',
     ];
 
     protected $casts = [
