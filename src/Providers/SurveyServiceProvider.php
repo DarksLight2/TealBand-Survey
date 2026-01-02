@@ -41,24 +41,24 @@ class SurveyServiceProvider extends ServiceProvider
             __DIR__ . '/../../config/tealband-survey.php' => config_path('tealband-survey.php'),
         ], 'tealband-survey-config');
 
-        Event::listen(
-            EmployeeAnswerSavedWithoutClarifyingEvent::class,
-            [GenerateEmployeeAnswerSummaryListener::class, 'handle']
-        );
-
-        Event::listen(
-            SavedClarifyResponseEvent::class,
-            [GenerateEmployeeAnswerSummaryListener::class, 'handle']
-        );
-
-        Event::listen(
-            EmployeeSessionIsFinishedEvent::class,
-            [GenerateEmployeeSessionSummaryListener::class, 'handle']
-        );
-
-        Event::listen(
-            SurveyQuestionsIsEndEvent::class,
-            [FinishEmployeeSessionListener::class, 'handle']
-        );
+//        Event::listen(
+//            EmployeeAnswerSavedWithoutClarifyingEvent::class,
+//            [GenerateEmployeeAnswerSummaryListener::class, 'handle']
+//        );
+//
+//        Event::listen(
+//            SavedClarifyResponseEvent::class,
+//            [GenerateEmployeeAnswerSummaryListener::class, 'handle']
+//        );
+//
+//        Event::listen(
+//            EmployeeSessionIsFinishedEvent::class,
+//            [GenerateEmployeeSessionSummaryListener::class, 'handle']
+//        );
+//
+//        Event::listen(
+//            SurveyQuestionsIsEndEvent::class,
+//            [FinishEmployeeSessionListener::class, 'handle']
+//        );
     }
 }
