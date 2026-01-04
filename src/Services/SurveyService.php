@@ -113,9 +113,7 @@ class SurveyService implements SurveyServiceContract
             'user_id' => $userId,
             'org_id' => $orgId,
             'status' => EmployeeSessionStatus::Active,
-        ])
-            ->latest()
-            ->first();
+        ]);
 
         if($session->wasRecentlyCreated) {
             event(new CreatedSurveySessionEvent($session));
