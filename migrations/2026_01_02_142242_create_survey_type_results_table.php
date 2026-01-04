@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignIdFor(config('tealband-survey.models.org'), 'org_id');
             $table->foreignIdFor(Survey::class);
             $table->foreignIdFor(Milestone::class);
-            $table->morphs('subject');
+            $table->ulidMorphs('subject');
 
             $table->unsignedTinyInteger('type');
             $table->unsignedInteger('value');
