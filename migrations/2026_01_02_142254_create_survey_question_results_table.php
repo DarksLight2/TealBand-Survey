@@ -20,8 +20,8 @@ return new class extends Migration
             $table->foreignIdFor(Question::class);
 
             $table->unsignedInteger('value');
-            $table->string('summary')->nullable();
-            $table->string('report')->nullable();
+            $table->string('summary', 512)->nullable();
+            $table->string('report', 512)->nullable();
 
             $table->timestamps();
         });

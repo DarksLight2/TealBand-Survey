@@ -12,8 +12,8 @@ return new class extends Migration
     {
         Schema::create('answers', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('clarifying')->nullable();
-            $table->string('comment');
+            $table->string('clarifying', 512)->nullable();
+            $table->string('comment', 512);
             $table->integer('weight');
 
             $table->foreignIdFor(Question::class);
