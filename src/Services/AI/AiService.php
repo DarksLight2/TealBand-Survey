@@ -44,7 +44,7 @@ class AiService
 
     public static function questionSummarizer(): AiHandlerContract
     {
-        return self::make(config('tealband-survey.summarizers.summarizers.question.provider'));
+        return self::make(config('tealband-survey.summarizers.question.provider'));
     }
 
     public static function detailedQuestionSummarizer(): AiHandlerContract
