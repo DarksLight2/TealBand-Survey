@@ -27,6 +27,7 @@ readonly class ChatGPTHandler implements AiHandlerContract
                 'Content-Type'  => 'application/json',
             ])
                 ->timeout($this->opts['timeout'])
+                ->connectTimeout($this->opts['connect_timeout'])
                 ->post($url, [
                     'model'       => $this->opts['model'],
                     'max_completion_tokens' => $this->opts['max_tokens'],

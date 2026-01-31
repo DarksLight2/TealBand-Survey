@@ -36,6 +36,7 @@ readonly class YandexHandler implements AiHandlerContract
                 'Content-Type'  => 'application/json',
             ])
                 ->timeout((int) ($this->opts['timeout'] ?? 30))
+                ->connectTimeout($this->opts['connect_timeout'])
                 ->post($url, $payload);
 
         } catch (ConnectionException $e) {
@@ -55,7 +56,7 @@ readonly class YandexHandler implements AiHandlerContract
 
         $text = $body['result']['alternatives'][0]['message']['text'] ?? null;
 
-        return is_string($text) ? str($text)->replace('```', '')->value() : '';
+        return is_string($text) ? str($text)->trim()->replace('```', '')->value() : '';
     }
 
     /**
