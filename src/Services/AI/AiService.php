@@ -8,7 +8,7 @@ use Tealband\Survey\Services\AI\Contracts\AiHandlerContract;
 
 class AiService
 {
-    private static function make(string|array $provider): AiHandlerContract
+    public static function make(string|array $provider): AiHandlerContract
     {
         if(is_array($provider)) {
             return app($provider['handler'], $provider);
