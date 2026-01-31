@@ -12,4 +12,16 @@ enum SurveyType: int
     case Possibilities = 3;
     case Understanding = 4;
     case Custom = 5;
+
+    public static function fromTemplate(string $val): self
+    {
+        return match ($val) {
+            'trust' => self::Trust,
+            'energy' => self::Energy,
+            'interest' => self::Interest,
+            'possibilities' => self::Possibilities,
+            'understanding' => self::Understanding,
+            'custom' => self::Custom,
+        };
+    }
 }
